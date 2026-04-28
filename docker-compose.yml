@@ -1,0 +1,44 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: docbed-qdrant
+    restart: unless-stopped
+    expose:
+      - 6333
+      - 6444
+    volumes:
+      - docbed_qdrant:/qdrant/storage
+    configs:
+      - source: qdrant_config
+        target: /qdrant/config/production.yaml
+    networks:
+      - docbed
+  
+  api:
+    image: docbed-api
+    build: .
+    container_name: docbed-api
+    restart: unless-stopped
+    networks:
+      - docbed
+    ports:
+      - "127.0.0.1:8000:8080"
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      TOGETHERAI_API_KEY: ${TOGETHERAI_API_KEY}
+
+networks:
+  docbed:
+    external: true
+
+volumes:
+  docbed_qdrant:
+    external: true
+
+configs:
+  qdrant_config:
+    file: qdrant.prod.yaml
