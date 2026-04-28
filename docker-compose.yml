@@ -13,10 +13,26 @@ services:
         target: /qdrant/config/production.yaml
     networks:
       - docbed
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhist:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  doc-converter:
+    image: docbed-doc-converter
+    build: ./doc-converter
+    container_name: docbed-doc-converter
+    restart: unless-stopped
+    networks:
+      - docbed
+    expose:
+      - 8000
   
   api:
     image: docbed-api
-    build: .
+    build: ./api
     container_name: docbed-api
     restart: unless-stopped
     networks:
@@ -26,6 +42,8 @@ services:
     depends_on:
       qdrant:
         condition: service_healthy
+      doc-converter:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
