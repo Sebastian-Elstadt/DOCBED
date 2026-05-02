@@ -1,0 +1,33 @@
+{
+    "page_number": 1,
+    "content_summary": "This page presents the title, abstract, and introduction of the DeepSeek-R1 technical paper, which proposes using pure reinforcement learning to incentivize advanced reasoning capabilities in large language models without relying on human-annotated demonstrations.",
+    "extracted_text": "...ALL PAGE TEXT...",
+    "tables": [],
+    "charts_diagrams": [],
+    "key_entities": [
+        "DeepSeek-R1",
+        "DeepSeek-AI",
+        "research@deepseek.com",
+        "arXiv:2501.12948v2 [cs.CL]",
+        "4 Jan 2026",
+        "Brown et al., 2020",
+        "OpenAI, 2023",
+        "Wei et al., 2022b",
+        "Kaplan et al., 2020",
+        "Wei et al., 2022a",
+        "Kojima et al., 2022",
+        "Chung et al., 2024",
+        "Reinforcement Learning (RL)",
+        "Large Language Models (LLMs)",
+        "Chain-of-Thought (CoT)",
+        "STEM fields",
+        "mathematics",
+        "coding competitions",
+        "self-reflection",
+        "verification",
+        "dynamic strategy adaptation",
+        "human-annotated demonstrations",
+        "human-labeled reasoning trajectories"
+    ],
+    "layout_type": "technical_paper"
+}

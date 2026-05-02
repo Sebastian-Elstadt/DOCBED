@@ -1,20 +1,53 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using App.Abstractions;
 using App.DocumentConverter;
 using App.DocumentVision;
 using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 
 namespace Infra.DocumentVision;
 
-public sealed class TogetherAiQwenDocumentVisionService(
+public sealed class TogetherAiDocumentVisionService(
     HttpClient httpClient,
-    ILogger<TogetherAiQwenDocumentVisionService> logger,
+    ILogger<TogetherAiDocumentVisionService> logger,
     IDocumentConverterService docConverterService
 ) : IDocumentVisionService
 {
-    private async Task<string> AnalyzePageImageAsync(DocumentPage page, AnalyzeDocumentOptions options, CancellationToken ct = default)
+    private static readonly Regex JsonFenceRegex = new(
+        @"```(?:json)?\s*(\{.*?\})\s*```",
+        RegexOptions.Singleline | RegexOptions.Compiled
+    );
+
+    private PageAnalysisResult ParsePageAnalysis(string response)
+    {
+        string? candidate = null;
+
+        var matches = JsonFenceRegex.Matches(response);
+        if (matches.Count > 0)
+        {
+            candidate = matches[^1].Groups[1].Value;
+        }
+        else
+        {
+            var start = response.IndexOf('{');
+            var end = response.LastIndexOf('}');
+            if (start >= 0 && end > start)
+            {
+                candidate = response[start..(end + 1)];
+            }
+        }
+
+        if (candidate is null)
+            throw new InvalidOperationException($"No JSON found in response: {response}");
+
+        return JsonSerializer.Deserialize<PageAnalysisResult>(candidate)
+            ?? throw new InvalidOperationException($"Failed to deserialize: {candidate}");
+    }
+
+    private async Task<PageAnalysisResult> AnalyzePageImageAsync(DocumentPage page, AnalyzeDocumentOptions options, CancellationToken ct = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
         {
@@ -96,10 +129,10 @@ public sealed class TogetherAiQwenDocumentVisionService(
                 sb.Append(c.GetString());
         }
 
-        return sb.ToString();
+        return ParsePageAnalysis(sb.ToString());
     }
 
-    public async Task<string> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, CancellationToken ct = default)
+    public async IAsyncEnumerable<PageAnalysisResult> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, [EnumeratorCancellation] CancellationToken ct = default)
     {
         await foreach (var page in docConverterService.ConvertToPageImagesAsync(fileStream, fileName, ct))
         {
@@ -115,9 +148,8 @@ public sealed class TogetherAiQwenDocumentVisionService(
                 continue;
             }
 
-            return await AnalyzePageImageAsync(page, options, ct);
+            yield return await AnalyzePageImageAsync(page, options, ct);
         }
-
-        return "";
     }
 }
+

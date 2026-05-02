@@ -4,5 +4,5 @@ namespace App.Abstractions;
 
 public interface IDocumentVisionService
 {
-    Task<string> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, CancellationToken ct = default);
+    IAsyncEnumerable<PageAnalysisResult> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, CancellationToken ct = default);
 }

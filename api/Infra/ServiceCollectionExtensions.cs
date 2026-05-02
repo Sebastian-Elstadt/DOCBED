@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
             client.Timeout = TimeSpan.FromMinutes(10);
         });
 
-        services.AddHttpClient<IDocumentVisionService, TogetherAiQwenDocumentVisionService>(client =>
+        services.AddHttpClient<IDocumentVisionService, TogetherAiDocumentVisionService>(client =>
         {
             var cfg = config.GetRequiredSection("TogetherAI").Get<TogetherAIConfig>();
             if (cfg is null) throw new InvalidOperationException("TogetherAI config is required.");
