@@ -1,0 +1,33 @@
+{
+    "page_number": 1,
+    "content_summary": "This page presents the title, abstract, and introduction of the DeepSeek-R1 technical paper, which proposes using pure reinforcement learning to incentivize advanced reasoning capabilities in large language models without relying on human-annotated demonstrations.",
+    "extracted_text": "arXiv:2501.12948v2 [cs.CL] 4 Jan 2026\n\ndeepseek\n\nDeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning\n\nDeepSeek-AI\nresearch@deepseek.com\n\nAbstract\n\nGeneral reasoning represents a long-standing and formidable challenge in artificial intelligence. Recent breakthroughs, exemplified by large language models (LLMs) (Brown et al., 2020; OpenAI, 2023) and chain-of-thought prompting (Wei et al., 2022b), have achieved considerable success on foundational reasoning tasks. However, this success is heavily contingent upon extensive human-annotated demonstrations, and models' capabilities are still insufficient for more complex problems. Here we show that the reasoning abilities of LLMs can be incentivized through pure reinforcement learning (RL), obviating the need for human-labeled reasoning trajectories. The proposed RL framework facilitates the emergent development of advanced reasoning patterns, such as self-reflection, verification, and dynamic strategy adaptation. Consequently, the trained model achieves superior performance on verifiable tasks such as mathematics, coding competitions, and STEM fields, surpassing its counterparts trained via conventional supervised learning on human demonstrations. Moreover, the emergent reasoning patterns exhibited by these large-scale models can be systematically harnessed to guide and enhance the reasoning capabilities of smaller models.\n\n1. Introduction\n\nReasoning capability, the cornerstone of human intelligence, enables complex cognitive tasks ranging from mathematical problem-solving to logical deduction and programming. Recent advances in artificial intelligence have demonstrated that large language models (LLMs) can exhibit emergent behaviors, including reasoning abilities, when scaled to a sufficient size (Kaplan et al., 2020; Wei et al., 2022a). However, achieving such capabilities in pre-training typically demands substantial computational resources. In parallel, a complementary line of research has demonstrated that large language models can be effectively augmented through chain-of-thought (CoT) prompting. This technique, which involves either providing carefully designed few-shot examples or using minimalistic prompts such as \"Let's think step by step\" (Kojima et al., 2022; Wei et al., 2022b), enables models to produce intermediate reasoning steps, thereby substantially enhancing their performance on complex tasks. Similarly, further performance gains have been observed when models learn high-quality, multi-step reasoning trajectories during the post-training phase (Chung et al., 2024; OpenAI, 2023). Despite their effectiveness, these approaches exhibit notable limitations. Their dependence on human-annotated reasoning traces hinders scalability and introduces cognitive biases. Furthermore, by constraining models to replicate human thought processes, their performance is inherently capped by the human-",
+    "tables": [],
+    "charts_diagrams": [],
+    "key_entities": [
+        "DeepSeek-R1",
+        "DeepSeek-AI",
+        "research@deepseek.com",
+        "arXiv:2501.12948v2 [cs.CL]",
+        "4 Jan 2026",
+        "Brown et al., 2020",
+        "OpenAI, 2023",
+        "Wei et al., 2022b",
+        "Kaplan et al., 2020",
+        "Wei et al., 2022a",
+        "Kojima et al., 2022",
+        "Chung et al., 2024",
+        "Reinforcement Learning (RL)",
+        "Large Language Models (LLMs)",
+        "Chain-of-Thought (CoT)",
+        "STEM fields",
+        "mathematics",
+        "coding competitions",
+        "self-reflection",
+        "verification",
+        "dynamic strategy adaptation",
+        "human-annotated demonstrations",
+        "human-labeled reasoning trajectories"
+    ],
+    "layout_type": "technical_paper"
+}

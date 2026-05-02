@@ -11,7 +11,6 @@ COPY . .
 RUN dotnet publish Api/Api.csproj \
         -c Release \
         -o /publish \
-        --no-restore \
         /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine

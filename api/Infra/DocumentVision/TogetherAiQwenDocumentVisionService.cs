@@ -1,23 +1,29 @@
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using App.Abstractions;
+using App.DocumentConverter;
 using App.DocumentVision;
+using Microsoft.Extensions.Logging;
 
 namespace Infra.DocumentVision;
 
-public class TogetherAiQwenDocumentVisionService(
-    HttpClient httpClient
+public sealed class TogetherAiQwenDocumentVisionService(
+    HttpClient httpClient,
+    ILogger<TogetherAiQwenDocumentVisionService> logger,
+    IDocumentConverterService docConverterService
 ) : IDocumentVisionService
 {
-    public async Task AnalyzeDocumentAsync(FileStream fileStream, AnalyzeDocumentOptions options, CancellationToken ct = default)
+    private async Task<string> AnalyzePageImageAsync(DocumentPage page, AnalyzeDocumentOptions options, CancellationToken ct = default)
     {
-        using var response = await httpClient.PostAsJsonAsync(
-            "v1/chat/completions",
-            new
+        var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
+        {
+            Content = JsonContent.Create(new
             {
-                model = "Qwen/Qwen2-VL-72B-Instruct",
+                model = "moonshotai/Kimi-K2.6",
                 temperature = options.Temperature,
                 max_tokens = options.MaxTokens,
-                response_format = new { type = "json_object" },
+                stream = true,
                 messages = (object[])[
                     new {
                         role = "system",
@@ -53,14 +59,65 @@ public class TogetherAiQwenDocumentVisionService(
                             new {
                                 type = "image_url",
                                 image_url = new {
-                                    url = "data:image/jpeg;base64,"
+                                    url = "data:image/jpeg;base64," + page.ImageBase64
                                 }
                             }
                         ]
                     }
                 ]
-            },
-            ct
-        );
+            })
+        };
+
+        using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var res = await response.Content.ReadAsStringAsync(ct);
+            throw new Exception("TogetherAI Request failed: " + res);
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(ct);
+        using var reader = new StreamReader(stream);
+        var sb = new StringBuilder();
+
+        while (await reader.ReadLineAsync(ct) is { } line)
+        {
+            if (string.IsNullOrEmpty(line) || !line.StartsWith("data: ")) continue;
+
+            var payload = line["data: ".Length..];
+            if (payload == "[DONE]") break;
+
+            using var doc = JsonDocument.Parse(payload);
+            var choices = doc.RootElement.GetProperty("choices");
+            if (choices.GetArrayLength() == 0) continue;
+
+            var delta = choices[0].GetProperty("delta");
+            if (delta.TryGetProperty("content", out var c) && c.ValueKind == JsonValueKind.String)
+                sb.Append(c.GetString());
+        }
+
+        return sb.ToString();
+    }
+
+    public async Task<string> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, CancellationToken ct = default)
+    {
+        await foreach (var page in docConverterService.ConvertToPageImagesAsync(fileStream, fileName, ct))
+        {
+            if (!page.Success)
+            {
+                logger.LogError($"Error on document '{fileName}' page {page.Page}: {page.Error}");
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(page.ImageBase64))
+            {
+                logger.LogError($"Error on document '{fileName}' page {page.Page}: No Base64 returned.");
+                continue;
+            }
+
+            return await AnalyzePageImageAsync(page, options, ct);
+        }
+
+        return "";
     }
 }
