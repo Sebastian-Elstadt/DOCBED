@@ -49,6 +49,8 @@ public sealed class TogetherAiDocumentVisionService(
 
     private async Task<DocumentPageAnalysis> AnalyzePageImageAsync(DocumentPageConversionResult page, AnalyzeDocumentOptions options, CancellationToken ct = default)
     {
+        logger.LogInformation($"Analyzing page {page.Page}...");
+
         var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
         {
             Content = JsonContent.Create(new
@@ -129,11 +131,14 @@ public sealed class TogetherAiDocumentVisionService(
                 sb.Append(c.GetString());
         }
 
+        logger.LogInformation($"Received full analysis result. Parsing...");
         return ParsePageAnalysis(sb.ToString());
     }
 
     private async IAsyncEnumerable<DocumentPageAnalysis> AnalyzePagesIterator(Stream fileStream, string fileName, AnalyzeDocumentOptions options, [EnumeratorCancellation] CancellationToken ct)
     {
+        logger.LogInformation($"Starting conversion and analysis on '{fileName}'.");
+
         await foreach (var page in docConverterService.ConvertToPageImagesAsync(fileStream, fileName, ct))
         {
             if (!page.Success)

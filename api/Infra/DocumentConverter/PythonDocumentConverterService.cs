@@ -3,13 +3,19 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using App.Abstractions;
 using App.DocumentConverter;
+using Microsoft.Extensions.Logging;
 
 namespace Infra.DocumentConverter;
 
-public sealed class PythonDocumentConverterService(HttpClient httpClient) : IDocumentConverterService
+public sealed class PythonDocumentConverterService(
+    HttpClient httpClient,
+    ILogger<PythonDocumentConverterService> logger
+) : IDocumentConverterService
 {
     public async IAsyncEnumerable<DocumentPageConversionResult> ConvertToPageImagesAsync(Stream fileStream, string fileName, [EnumeratorCancellation] CancellationToken ct = default)
     {
+        logger.LogInformation($"Converting input file '{fileName}' to page images...");
+
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(fileStream);
 
@@ -35,8 +41,14 @@ public sealed class PythonDocumentConverterService(HttpClient httpClient) : IDoc
             var page = JsonSerializer.Deserialize<DocumentPageConversionResult>(line,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
 
-            if (page != null)
-                yield return page;
+            if (page is null)
+            {
+                logger.LogWarning("Converted document page returned null.");
+                continue;
+            }
+
+            logger.LogInformation($"Converted page {page.Page}.");
+            yield return page;
         }
     }
 }

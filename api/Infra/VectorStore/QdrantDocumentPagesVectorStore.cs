@@ -1,11 +1,15 @@
 using App.Abstractions;
 using App.VectorStore;
+using Microsoft.Extensions.Logging;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
 namespace Infra.VectorStore;
 
-public class QdrantDocumentPagesVectorStore(QdrantClient client) : IVectorStore<DocumentPageVectorData>
+public class QdrantDocumentPagesVectorStore(
+    QdrantClient client,
+    ILogger<QdrantDocumentPagesVectorStore> logger
+) : IVectorStore<DocumentPageVectorData>
 {
     private const string CollectionName = "document_pages";
     private const ulong VectorDim = 1024;
@@ -14,6 +18,8 @@ public class QdrantDocumentPagesVectorStore(QdrantClient client) : IVectorStore<
     {
         bool exists = await client.CollectionExistsAsync(CollectionName, ct);
         if (exists) return;
+
+        logger.LogInformation("Migrating Qdrant document pages vector store...");
 
         await client.CreateCollectionAsync(
             collectionName: CollectionName,
@@ -31,6 +37,8 @@ public class QdrantDocumentPagesVectorStore(QdrantClient client) : IVectorStore<
             schemaType: PayloadSchemaType.Uuid,
             cancellationToken: ct
         );
+
+        logger.LogInformation("Qdrant document pages migration finished.");
     }
 
     public async Task UpsertAsync(IReadOnlyList<VectorPoint<DocumentPageVectorData>> points, CancellationToken ct = default)

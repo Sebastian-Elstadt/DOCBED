@@ -5,13 +5,13 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("documents")]
-public class DocumentsController(IDocumentVisionService docVisionService) : ControllerBase
+public class DocumentsController(IDocumentPipeline documentPipeline) : ControllerBase
 {
-    [HttpPost("analysis")]
-    public async Task<IActionResult> Analyze(IFormFile file)
+    [HttpPost]
+    public async Task<IActionResult> IngestDocumentAsync(IFormFile file)
     {
         using var strm = file.OpenReadStream();
-        var result = await docVisionService.AnalyzeDocumentAsync(strm, file.FileName, new(0.2, 8192), HttpContext.RequestAborted);
-        return Content(result, "application/json");
+        await documentPipeline.IngestAsync(strm, file.FileName, HttpContext.RequestAborted);
+        return Ok();
     }
 }

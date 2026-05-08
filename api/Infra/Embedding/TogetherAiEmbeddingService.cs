@@ -21,6 +21,7 @@ public class TogetherAiEmbeddingService(
 
     public async Task<IEnumerable<double[]>> GenerateEmbeddingsAsync(string[] inputs, CancellationToken ct = default)
     {
+        logger.LogInformation($"Generating embeddings for {inputs.Count()} inputs...");
         var request = new HttpRequestMessage(HttpMethod.Post, "v1/embeddings")
         {
             Content = JsonContent.Create(new
