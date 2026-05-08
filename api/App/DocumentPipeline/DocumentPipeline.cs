@@ -8,7 +8,7 @@ namespace App.DocumentPipeline;
 public class DocumentPipeline(
     IDocumentVisionService visionService,
     IEmbeddingService embeddingService,
-    IVectorStore vectorStore
+    IVectorStore<DocumentPageVectorData> vectorStore
 ) : IDocumentPipeline
 {
     public async Task IngestAsync(Stream fileStream, string fileName, CancellationToken ct = default)
@@ -52,6 +52,6 @@ public class DocumentPipeline(
     public async Task<IReadOnlyList<VectorSearchHit<DocumentPageVectorData>>> SearchAsync(string query, int topK = 5, Guid? filterByDocId = null, CancellationToken ct = default)
     {
         var vector = (await embeddingService.GenerateEmbeddingsAsync(["query: " + query], ct)).Single();
-        return await vectorStore.SearchAsync<DocumentPageVectorData>(vector, topK, filterByDocId, ct);
+        return await vectorStore.SearchAsync(vector, topK, filterByDocId, ct);
     }
 }

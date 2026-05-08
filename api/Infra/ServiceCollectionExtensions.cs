@@ -1,9 +1,11 @@
 ﻿using System.Net.Http.Headers;
 using App.Abstractions;
+using App.VectorStore;
 using Infra.Configs;
 using Infra.DocumentConverter;
 using Infra.DocumentVision;
 using Infra.Embedding;
+using Infra.VectorStore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +38,8 @@ public static class ServiceCollectionExtensions
             client.Timeout = TimeSpan.FromMinutes(10);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", togetherAiConfig.ApiKey);
         });
+
+        services.AddSingleton<IVectorStore<DocumentPageVectorData>, QdrantDocumentPagesVectorStore>();
 
         return services;
     }
