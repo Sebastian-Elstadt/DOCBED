@@ -8,7 +8,7 @@ namespace Infra.DocumentConverter;
 
 public sealed class PythonDocumentConverterService(HttpClient httpClient) : IDocumentConverterService
 {
-    public async IAsyncEnumerable<DocumentPage> ConvertToPageImagesAsync(Stream fileStream, string fileName, [EnumeratorCancellation] CancellationToken ct = default)
+    public async IAsyncEnumerable<DocumentPageConversionResult> ConvertToPageImagesAsync(Stream fileStream, string fileName, [EnumeratorCancellation] CancellationToken ct = default)
     {
         using var content = new MultipartFormDataContent();
         using var streamContent = new StreamContent(fileStream);
@@ -32,7 +32,7 @@ public sealed class PythonDocumentConverterService(HttpClient httpClient) : IDoc
             var line = await reader.ReadLineAsync(ct);
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var page = JsonSerializer.Deserialize<DocumentPage>(line,
+            var page = JsonSerializer.Deserialize<DocumentPageConversionResult>(line,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
 
             if (page != null)

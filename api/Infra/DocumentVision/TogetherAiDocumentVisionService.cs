@@ -21,7 +21,7 @@ public sealed class TogetherAiDocumentVisionService(
         RegexOptions.Singleline | RegexOptions.Compiled
     );
 
-    private PageAnalysisResult ParsePageAnalysis(string response)
+    private DocumentPageAnalysis ParsePageAnalysis(string response)
     {
         string? candidate = null;
 
@@ -43,11 +43,11 @@ public sealed class TogetherAiDocumentVisionService(
         if (candidate is null)
             throw new InvalidOperationException($"No JSON found in response: {response}");
 
-        return JsonSerializer.Deserialize<PageAnalysisResult>(candidate)
+        return JsonSerializer.Deserialize<DocumentPageAnalysis>(candidate)
             ?? throw new InvalidOperationException($"Failed to deserialize: {candidate}");
     }
 
-    private async Task<PageAnalysisResult> AnalyzePageImageAsync(DocumentPage page, AnalyzeDocumentOptions options, CancellationToken ct = default)
+    private async Task<DocumentPageAnalysis> AnalyzePageImageAsync(DocumentPageConversionResult page, AnalyzeDocumentOptions options, CancellationToken ct = default)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
         {
@@ -132,7 +132,7 @@ public sealed class TogetherAiDocumentVisionService(
         return ParsePageAnalysis(sb.ToString());
     }
 
-    public async IAsyncEnumerable<PageAnalysisResult> AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options, [EnumeratorCancellation] CancellationToken ct = default)
+    private async IAsyncEnumerable<DocumentPageAnalysis> AnalyzePagesIterator(Stream fileStream, string fileName, AnalyzeDocumentOptions options, [EnumeratorCancellation] CancellationToken ct)
     {
         await foreach (var page in docConverterService.ConvertToPageImagesAsync(fileStream, fileName, ct))
         {
@@ -151,5 +151,13 @@ public sealed class TogetherAiDocumentVisionService(
             yield return await AnalyzePageImageAsync(page, options, ct);
         }
     }
-}
 
+    public DocumentAnalysis AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options)
+    {
+        return new()
+        {
+            DocumentHash = [],
+            AnalyzePages = (ct) => AnalyzePagesIterator(fileStream, fileName, options, ct)
+        };
+    }
+}

@@ -1,6 +1,6 @@
 namespace App.DocumentConverter;
 
-public record DocumentPage(
+public record DocumentPageConversionResult(
     bool Success,
     int Page,
     string? ImageBase64,

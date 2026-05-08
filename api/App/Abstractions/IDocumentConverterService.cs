@@ -4,5 +4,5 @@ namespace App.Abstractions;
 
 public interface IDocumentConverterService
 {
-    IAsyncEnumerable<DocumentPage> ConvertToPageImagesAsync(Stream fileStream, string fileName, CancellationToken ct = default);
+    IAsyncEnumerable<DocumentPageConversionResult> ConvertToPageImagesAsync(Stream fileStream, string fileName, CancellationToken ct = default);
 }
