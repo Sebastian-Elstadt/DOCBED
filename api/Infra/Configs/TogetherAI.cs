@@ -1,6 +1,7 @@
 namespace Infra.Configs;
 
 public sealed record TogetherAIConfig(
+    string BaseUrl,
     string ApiKey
 )
 {

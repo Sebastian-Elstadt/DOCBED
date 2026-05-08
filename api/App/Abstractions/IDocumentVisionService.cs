@@ -4,5 +4,5 @@ namespace App.Abstractions;
 
 public interface IDocumentVisionService
 {
-    DocumentAnalysis AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options);
+    DocumentAnalysis AnalyzeDocument(Stream fileStream, string fileName, AnalyzeDocumentOptions options);
 }

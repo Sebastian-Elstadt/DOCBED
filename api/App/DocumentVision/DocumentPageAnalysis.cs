@@ -29,7 +29,7 @@ public record DocumentPageAnalysis
 
     public string GenerateEmbeddingText()
     {
-        return string.Join("\n\n", new[]
+        return "passage: " + string.Join("\n\n", new[]
         {
             $"Page {PageNumber}: {ContentSummary}",
             ExtractedText,

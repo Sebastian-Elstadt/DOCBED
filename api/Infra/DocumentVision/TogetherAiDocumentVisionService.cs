@@ -152,7 +152,7 @@ public sealed class TogetherAiDocumentVisionService(
         }
     }
 
-    public DocumentAnalysis AnalyzeDocumentAsync(Stream fileStream, string fileName, AnalyzeDocumentOptions options)
+    public DocumentAnalysis AnalyzeDocument(Stream fileStream, string fileName, AnalyzeDocumentOptions options)
     {
         return new()
         {
