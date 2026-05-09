@@ -57,6 +57,9 @@ services:
       ASPNETCORE_URLS: http://+:8080
       TogetherAI__BaseUrl: ${TOGETHERAI_BASE_URL}
       TogetherAI__ApiKey: ${TOGETHERAI_API_KEY}
+      Qdrant__Host: ${QDRANT_HOST}
+      Qdrant__Port: ${QDRANT_PORT}
+      Qdrant__HTTPS: ${QDRANT_HTTPS}
 
 networks:
   docbed:

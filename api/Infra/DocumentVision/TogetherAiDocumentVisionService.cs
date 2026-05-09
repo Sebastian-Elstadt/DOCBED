@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using App.Abstractions;
 using App.DocumentConverter;
 using App.DocumentVision;
@@ -16,49 +15,16 @@ public sealed class TogetherAiDocumentVisionService(
     IDocumentConverterService docConverterService
 ) : IDocumentVisionService
 {
-    private static readonly Regex JsonFenceRegex = new(
-        @"```(?:json)?\s*(\{.*?\})\s*```",
-        RegexOptions.Singleline | RegexOptions.Compiled
-    );
-
     private DocumentPageAnalysis ParsePageAnalysis(string response)
     {
-        int endThinkTagIndex = response.LastIndexOf("</think>");
-        if (endThinkTagIndex >= 0)
-        {
-            response = response.Substring(endThinkTagIndex + "</think>".Length);
-        }
-
-        string? candidate = null;
-
-        var matches = JsonFenceRegex.Matches(response);
-        if (matches.Count > 0)
-        {
-            candidate = matches[^1].Groups[1].Value;
-        }
-        else
-        {
-            var start = response.IndexOf('{');
-            var end = response.LastIndexOf('}');
-            if (start >= 0 && end > start)
-            {
-                candidate = response[start..(end + 1)];
-            }
-        }
-
-        if (candidate is null)
-            throw new InvalidOperationException($"No JSON found in response: {response}");
-
         try
         {
-            return JsonSerializer.Deserialize<DocumentPageAnalysis>(candidate)
-                ?? throw new InvalidOperationException($"Failed to deserialize: {candidate}");
+            return PageAnalysisParser.Parse(response);
         }
         catch
         {
             logger.LogError("Failed to parse document vision JSON response.");
             logger.LogError("Response:\n" + response);
-            logger.LogError("Candidate:\n" + candidate);
             throw;
         }
     }

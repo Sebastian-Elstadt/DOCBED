@@ -1,0 +1,15 @@
+{
+  "name": "extract-pages",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "extract-pages": "./extract-pages.js"
+  },
+  "scripts": {
+    "start": "node extract-pages.js"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
+}
