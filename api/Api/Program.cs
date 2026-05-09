@@ -6,8 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services
-    .AddApp()
-    .AddInfra(builder.Configuration);
+    .AddInfra(builder.Configuration)
+    .AddApp();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

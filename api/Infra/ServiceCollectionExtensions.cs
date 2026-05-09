@@ -8,6 +8,7 @@ using Infra.Embedding;
 using Infra.VectorStore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Qdrant.Client;
 
 namespace Infra;
 
@@ -39,6 +40,14 @@ public static class ServiceCollectionExtensions
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", togetherAiConfig.ApiKey);
         });
 
+        services.AddSingleton(sp =>
+        {
+            var qdrantConfig = config.GetRequiredSection("Qdrant").Get<QdrantConfig>();
+            if (qdrantConfig is null) throw new InvalidOperationException("Qdrant config is required.");
+            qdrantConfig.EnsureValid();
+
+            return new QdrantClient(qdrantConfig.Host, qdrantConfig.Port, qdrantConfig.Https);
+        });
         services.AddSingleton<IVectorStore<DocumentPageVectorData>, QdrantDocumentPagesVectorStore>();
 
         return services;

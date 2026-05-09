@@ -32,7 +32,8 @@ public record DocumentPageAnalysis
         return "passage: " + string.Join("\n\n", new[]
         {
             $"Page {PageNumber}: {ContentSummary}",
-            ExtractedText,
+            // ExtractedText, // opted for KeyEntities instead. The demo embeddings model I'm using has a small token limit.
+            string.Join(',', KeyEntities),
             string.Join("\n", ChartsDiagrams.Select(cd => cd.Description).Where(s => !string.IsNullOrWhiteSpace(s)))
         });
     }

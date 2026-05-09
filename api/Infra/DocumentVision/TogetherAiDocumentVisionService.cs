@@ -23,6 +23,12 @@ public sealed class TogetherAiDocumentVisionService(
 
     private DocumentPageAnalysis ParsePageAnalysis(string response)
     {
+        int endThinkTagIndex = response.LastIndexOf("</think>");
+        if (endThinkTagIndex >= 0)
+        {
+            response = response.Substring(endThinkTagIndex + "</think>".Length);
+        }
+
         string? candidate = null;
 
         var matches = JsonFenceRegex.Matches(response);
@@ -43,8 +49,18 @@ public sealed class TogetherAiDocumentVisionService(
         if (candidate is null)
             throw new InvalidOperationException($"No JSON found in response: {response}");
 
-        return JsonSerializer.Deserialize<DocumentPageAnalysis>(candidate)
-            ?? throw new InvalidOperationException($"Failed to deserialize: {candidate}");
+        try
+        {
+            return JsonSerializer.Deserialize<DocumentPageAnalysis>(candidate)
+                ?? throw new InvalidOperationException($"Failed to deserialize: {candidate}");
+        }
+        catch
+        {
+            logger.LogError("Failed to parse document vision JSON response.");
+            logger.LogError("Response:\n" + response);
+            logger.LogError("Candidate:\n" + candidate);
+            throw;
+        }
     }
 
     private async Task<DocumentPageAnalysis> AnalyzePageImageAsync(DocumentPageConversionResult page, AnalyzeDocumentOptions options, CancellationToken ct = default)

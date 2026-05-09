@@ -15,8 +15,8 @@ public class DocumentPipeline(
 {
     public async Task IngestAsync(Stream fileStream, string fileName, CancellationToken ct = default)
     {
-        const int PagesBatchSize = 16;
-        var visionOptions = new AnalyzeDocumentOptions(Temperature: 0.2, MaxTokens: 8000);
+        const int PagesBatchSize = 2;
+        var visionOptions = new AnalyzeDocumentOptions(Temperature: 0.2, MaxTokens: 14000);
 
         var analysis = visionService.AnalyzeDocument(fileStream, fileName, visionOptions);
         var documentId = analysis.DocumentHash.ToGuid();
